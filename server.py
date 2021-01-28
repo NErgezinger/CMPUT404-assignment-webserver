@@ -29,7 +29,7 @@ import os
 
 
 class MyWebServer(socketserver.BaseRequestHandler):
-    
+
     def handle(self):
         self.data = self.request.recv(1024).strip()
         # print ("Got a request of: %s\n" % self.data.decode('utf-8'))
@@ -37,7 +37,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
 
         data_split = self.data.decode('utf-8').split()
 
-        print("Split request: \n", self.data.decode('utf-8').split())
+        # print("Split request: \n", self.data.decode('utf-8').split())
 
         if data_split[0] == 'GET':
             requested_path = data_split[1]
@@ -52,7 +52,12 @@ class MyWebServer(socketserver.BaseRequestHandler):
                 if os.path.exists(requested_path) and requested_dir[:3] == "www":
                     with open(requested_path) as f:
                         requested_file = f.read()
-                        self.request.sendall(bytearray("HTTP/1.1 200 OK\r\n" + requested_file + "\r\n\r\n", "utf-8"))
+                        if requested_path[-5:] == '.html':
+                            self.request.sendall(bytearray("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n" + requested_file + "\r\n\r\n", "utf-8"))
+                        elif requested_path[-4:] == '.css':
+                            self.request.sendall(bytearray("HTTP/1.1 200 OK\r\nContent-Type: text/css\r\n\r\n" + requested_file + "\r\n\r\n", "utf-8"))
+                        else:
+                            self.request.sendall(bytearray("HTTP/1.1 200 OK\r\n" + requested_file + "\r\n\r\n", "utf-8"))
                 else:
                     self.request.sendall(bytearray("HTTP/1.1 404 Not Found\r\n\r\n", "utf-8"))
         elif data_split[0] != 'GET':
