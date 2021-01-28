@@ -24,3 +24,8 @@ examples thus some of the code is Copyright © 2001-2013 Python
 Software Foundation; All Rights Reserved under the PSF license (GPL
 compatible) http://docs.python.org/2/library/socketserver.html
 
+Sources
+=======
+How to adapt Apache license for derivative work: 
+- From user https://opensource.stackexchange.com/users/258/bart-van-ingen-schenau
+- Post: https://opensource.stackexchange.com/a/9200
