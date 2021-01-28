@@ -1,5 +1,6 @@
 #  coding: utf-8 
 import socketserver
+import os
 
 # Copyright 2013 Abram Hindle, Eddie Antonio Santos
 # 
@@ -31,8 +32,31 @@ class MyWebServer(socketserver.BaseRequestHandler):
     
     def handle(self):
         self.data = self.request.recv(1024).strip()
-        print ("Got a request of: %s\n" % self.data)
-        self.request.sendall(bytearray("OK",'utf-8'))
+        # print ("Got a request of: %s\n" % self.data.decode('utf-8'))
+        # self.request.sendall(bytearray("OK",'utf-8'))
+
+        data_split = self.data.decode('utf-8').split()
+
+        print("Split request: \n", self.data.decode('utf-8').split())
+
+        if data_split[0] == 'GET':
+            requested_path = data_split[1]
+            if requested_path[-1] != '/' and '.' not in requested_path[-5:]:
+                self.request.sendall(bytearray("HTTP/1.1 301 Moved Permanantly\r\nLocation:http://127.0.0.1:8080"+ requested_path + "/\r\n\r\n", "utf-8"))
+            else:
+                if '.' not in requested_path[-5:]:
+                    requested_path = 'www' + requested_path + 'index.html'
+                else:
+                    requested_path = 'www' + requested_path
+                requested_dir = os.path.dirname(requested_path)
+                if os.path.exists(requested_path) and requested_dir[:3] == "www":
+                    with open(requested_path) as f:
+                        requested_file = f.read()
+                        self.request.sendall(bytearray("HTTP/1.1 200 OK\r\n" + requested_file + "\r\n\r\n", "utf-8"))
+                else:
+                    self.request.sendall(bytearray("HTTP/1.1 404 Not Found\r\n\r\n", "utf-8"))
+        elif data_split[0] != 'GET':
+            self.request.sendall(bytearray("HTTP/1.1 405 Method Not Allowed\r\n\r\n", "utf-8"))
 
 if __name__ == "__main__":
     HOST, PORT = "localhost", 8080
